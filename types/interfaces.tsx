@@ -14,5 +14,6 @@ export interface IGithubIssue {
     title: string,
     body: string,
     user: IGithubUser,
-    created_at: string
+    created_at: string,
+    comments: number
 }

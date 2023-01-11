@@ -12,30 +12,50 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
 
-  const [repositorySearchKey, setRepositorySearchKey] = useState("");
-
+  const [loading, setLoading] = useState<boolean>(false);
+  const [repositorySearchKey, setRepositorySearchKey] = useState<string>("");
   const [repository, setRepository] = useState<IGithubRepository | undefined>(undefined);
   const [issues, setIssues] = useState<Array<IGithubIssue> | undefined>(undefined);
+
   const [page, setPage] = useState<number>(1);
+  const [sortField, setSortField] = useState<string>("created");
+  const [sortDirection, setSortDirection] = useState<string>("desc");
 
   const service = new GithubService();
   
   const searchRepository = async () => {
     
+    setLoading(true);
+    setRepository(undefined);
+    setIssues(undefined);
+
     const _repo = await service.getRepo(repositorySearchKey);
     if(_repo){
       setRepository(_repo);
       setPage(0);
-      setIssues(await getIssues(0));
+      setIssues(await getIssues(0, sortField, sortDirection));
     }
     else {
       alert("Repository not found")
     }
     
+    setLoading(false);
+    
   }
 
-  const getIssues = async (p: number) => {
-    return await service.listIssues(repositorySearchKey, 15, p);
+  const updateSort = async (field: string, direction: string) => {
+
+    setLoading(true);
+    setPage(0);
+    setSortField(field);
+    setSortDirection(direction);
+    setIssues(await getIssues(0, field, direction));
+    setLoading(false);
+
+  }
+
+  const getIssues = async (p: number, field: string, direction: string) => {
+    return await service.listIssues(repositorySearchKey, 15, p, field, direction);
   }
 
   const onScroll = async () => {
@@ -44,7 +64,7 @@ export default function Home() {
     const clientHeight = document.documentElement.clientHeight;
 
     if (scrollTop + clientHeight >= scrollHeight) {
-      const _issues = (issues || []).concat(await getIssues(page + 1));
+      const _issues = (issues || []).concat(await getIssues(page + 1, sortField, sortDirection));
       setIssues(_issues);
       setPage(page + 1);
     }
@@ -70,7 +90,9 @@ export default function Home() {
             <input disabled={repositorySearchKey === ""} type={"button"} value="Go" onClick={searchRepository}/>
         </div>
 
-        { repository && 
+        { loading && <div className={styles.search}><p>Loading...</p></div> }
+        
+        { !loading && repository && 
           <>
           <div className={styles.repo}>
             <h2>Repo Info</h2>
@@ -84,11 +106,26 @@ export default function Home() {
           </>
         }
 
-        { issues && 
+        { !loading && issues && 
           <>
           <div className={styles.issues}>
-              <h2>Repo Issues</h2>
-              { issues.length === 0 ? <span>No issues found</span> : <span>(click on an issue to see details)</span> }
+          <div className={styles.issuesheader}>
+                <div>
+                  <h2>Repo Issues</h2>
+                  { issues.length === 0 ? <span>No issues found</span> : <span>(click on an issue to see details)</span> }
+                </div>
+                <div>
+                  Sort by:&nbsp;
+                  <select value={sortField} onChange={(e) => updateSort(e.target.value, sortDirection)}>
+                    <option value="created">created</option>
+                    <option value="comments">comments</option>
+                  </select>
+                  <select value={sortDirection} onChange={(e) => updateSort(sortField, e.target.value)}>
+                    <option value="asc">asc</option>
+                    <option value="desc">desc</option>
+                  </select>
+                </div>
+              </div>
               { issues.map(issue => <IssueCard key={issue.id} issue={issue}/>) }
           </div>
           </>

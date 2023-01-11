@@ -29,10 +29,10 @@ export default class GithubService {
       }
     }
 
-    listIssues: ListIssues = async (searchKey: string, per_page: number, page: number) => {
+    listIssues: ListIssues = async (searchKey: string, per_page: number, page: number, field: string, direction: string) => {
       try 
       {
-        const response = await axios.get(`${this.baseURL}/repos/${searchKey}/issues?sort=created&direction=desc&per_page=${per_page}&page=${page}`);
+        const response = await axios.get(`${this.baseURL}/repos/${searchKey}/issues?sort=${field}&direction=${direction}&per_page=${per_page}&page=${page}`);
         return response.data;
       } 
       catch (error) 
