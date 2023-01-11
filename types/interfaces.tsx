@@ -10,6 +10,7 @@ export interface IGithubRepository {
 }
 
 export interface IGithubIssue {
+    id: number,
     title: string,
     body: string,
     user: IGithubUser,

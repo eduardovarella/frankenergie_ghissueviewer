@@ -71,7 +71,7 @@
 }
 
 .repoowner div:last-child {
-  background-color: green;
+  margin-left: 20px;
 }
 
 .issues {
@@ -88,7 +88,10 @@
   padding: 20px;
 }
 
-
+.issues h2 {
+  text-decoration: underline;
+  margin-bottom: 10px;
+}
 
 .issue {
   display: inherit;

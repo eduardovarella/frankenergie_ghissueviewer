@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
 
-  const [repositorySearchKey, setRepositorySearchKey] = useState("vercel/next.js");
+  const [repositorySearchKey, setRepositorySearchKey] = useState("");
 
   const [repository, setRepository] = useState<IGithubRepository | undefined>(undefined);
   const [issues, setIssues] = useState<Array<IGithubIssue> | undefined>(undefined);
@@ -67,7 +67,7 @@ export default function Home() {
         <div className={styles.search}>
             <p>Please input repository name:</p>            
             <input type={"text"} value={repositorySearchKey} onChange={(e) => setRepositorySearchKey(e.target.value)}/>
-            <input type={"button"} value="Go" onClick={searchRepository}/>
+            <input disabled={repositorySearchKey === ""} type={"button"} value="Go" onClick={searchRepository}/>
         </div>
 
         { repository && 
@@ -88,8 +88,8 @@ export default function Home() {
           <>
           <div className={styles.issues}>
               <h2>Repo Issues</h2>
-              <span>(click on an issue to see details)</span>
-              { issues.map(issue => <IssueCard issue={issue}/>) }
+              { issues.length === 0 ? <span>No issues found</span> : <span>(click on an issue to see details)</span> }
+              { issues.map(issue => <IssueCard key={issue.id} issue={issue}/>) }
           </div>
           </>
         }
